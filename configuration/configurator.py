@@ -34,7 +34,7 @@ class Configurator(object):
         self.url = config.get("url", url_frompattern)
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)
-        self.period_s = config.get("period_s", 5)# 15 * 60)
+        self.period_s = config.get("period_s", 15 * 60)
         return config
 
     def update(self, config, write=True):
