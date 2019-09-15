@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import time
 import busio
@@ -5,8 +6,6 @@ import digitalio
 import board
 import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
-
-from __future__ import print_function
 import serial, struct, sys, time, json, subprocess
 
 
@@ -27,6 +26,8 @@ class SDS(object):
         self.DEBUG = DEBUG
         self.VERBOSE = VERBOSE
         self.ser = serial.Serial()
+        self.ser.timeout = .02
+        self.timout = 2
         self.ser.port = "/dev/ttyAMA0"
         self.ser.baudrate = 9600
         self.ser.open()
@@ -64,8 +65,13 @@ class SDS(object):
 
     def read_response(self):
         byte = 0
-        while byte != b"\xaa":
+        start = time.time()
+        timeout = False
+        while byte != b"\xaa" and not timeout:
             byte = self.ser.read(size=1)
+            timeout = time.time() - start > self.timout
+        if timeout:
+            raise Exception("Timed out reading serial")
         d = self.ser.read(size=9)
         if self.DEBUG:
             self.dump(d, '< ')
@@ -98,13 +104,12 @@ class SDS(object):
         return self.process_version(d)
 
     def cmd_set_id(self, id):
-        id_h = (id > > 8) % 256
+        id_h = (id >> 8) % 256
         id_l = id % 256
         self.ser.write(self.construct_command(SDS_CONSTS.CMD_DEVICE_ID, [0] * 10 + [id_l, id_h]))
         self.read_response()
 
     def get_value(self):
-        self.ser.timeout = .02
         self.cmd_set_sleep(0)
         time.sleep(2)
         self.cmd_set_working_period(SDS_CONSTS.PERIOD_CONTINUOUS)

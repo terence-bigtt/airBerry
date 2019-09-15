@@ -11,10 +11,11 @@ class Sensors(object):
         self.calibrated = False
 
     def calibrate(self):
+        oks=[]
         for sensor in self.sensors:
             if "calibrate" in dir(sensor):
-                sensor.calibrate()
-        self.calibrated = True
+                oks.append(sensor.calibrate())
+        self.calibrated = True if None not in oks else False
 
     def get_values(self):
         values = []

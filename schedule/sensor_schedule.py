@@ -13,5 +13,5 @@ class SensorScheduler(object):
         for datum in data:
             self.persistor.persist(datum)
         now = datetime.datetime.now()
-        nextrun = now + datetime.timedelta(seconds=self.persistor.config.period)
+        nextrun = now + datetime.timedelta(seconds=self.persistor.config.period_s)
         self.scheduler.add_job(self.read_and_reschedule, 'date', next_run_time=nextrun)

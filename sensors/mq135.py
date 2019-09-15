@@ -7,6 +7,8 @@ import time
 import math
 
 
+# TODO: Persist caliibration data
+
 class MqResponse(object):
     def __init__(self):
         self._nh4pars = [(10, 2.6), (100, 1)]
@@ -15,7 +17,7 @@ class MqResponse(object):
         self.nh4 = self._power_law(self._nh4pars)
         self.co = self._power_law(self._copars)
         self.co2 = self._power_law(self._co2pars)
-        self.laws = {MqGaz.NH4: self.nh4, MqGaz.CO: self.co, MqGaz.CO2:self.co2}
+        self.laws = {MqGaz.NH4: self.nh4, MqGaz.CO: self.co, MqGaz.CO2: self.co2}
 
     def _power_law(self, pars):
         exponent = math.log(pars[1][1] / pars[0][1]) / math.log(pars[1][0] / pars[0][0])
@@ -27,12 +29,14 @@ class MqGaz:
     CO = 1
     CO2 = 2
 
-    names = {NH4:"nh4", CO:"co", CO2:"co2"}
+    names = {NH4: "nh4", CO: "co", CO2: "co2"}
+
 
 class MQSensor(object):
-    def __init__(self, gaz = MqGaz.NH4, cs_pin=board.D22, mcp_pin=MCP.P0, analog_scale=5., read_sample=5, read_interval=100,
+    def __init__(self, gaz=MqGaz.NH4, cs_pin=board.D22, mcp_pin=MCP.P0, analog_scale=5., read_sample=5,
+                 read_interval=100,
                  calibration_sample=10, sample_interval=500, load_resistor=5):
-        self.gaz=gaz
+        self.gaz = gaz
         self.gaz_name = MqGaz.names[gaz]
         self.to_concentration = MqResponse().laws[self.gaz]
         self.analog_scale = analog_scale
@@ -54,23 +58,29 @@ class MQSensor(object):
         for i in range(self.calibration_sample):
             vals.append(self._measure_resistance())
             time.sleep(self.sample_interval / 1000.)
-        self.r0 = sum(vals) / len(vals) / self.clean_air_factor
-        print("Calibration done")
+
+        vals = [v for v in vals if v is not None]
+        if len(vals) != 0:
+            self.r0 = sum(vals) / len(vals) / self.clean_air_factor
+            return "Calibration done"
 
     def _measure_adc(self):
         return self.chan0.voltage / self.analog_scale
 
     def _measure_resistance(self):
         adc = self._measure_adc()
-        return self.load_resistor * (1 - adc) / adc
+        if adc != 0:
+            return self.load_resistor * (1 - adc) / adc
 
     def get_value(self):
         vals = []
         for i in range(self.read_sample):
             vals.append(self._measure_resistance())
-        rs = self.load_resistor * sum(vals) / len(vals)
-        ppm = self.to_concentration(rs/self.r0)
-        raw = self._measure_adc()
+        vals = [v for v in vals if v is not None]
+        rs = self.load_resistor * sum(vals) / len(vals) if len(vals) != 0 else None
+        ppm = self.to_concentration(rs / self.r0) if len(vals) != 0 else None
+        raw = self._measure_adc() if len(vals) != 0 else None
 
-        json_row = {"raw": raw, "ppm_"+self.gaz_name: ppm,'time': time.strftime("%d.%m.%Y %H:%M:%S"), "ts": time.time()}
+        json_row = {"raw": raw, "ppm_" + self.gaz_name: ppm, 'time': time.strftime("%d.%m.%Y %H:%M:%S"),
+                    "ts": time.time()}
         return json_row

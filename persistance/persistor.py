@@ -4,7 +4,7 @@ import json
 
 
 class Persistor(object):
-    def __init__(self,  config):
+    def __init__(self, config):
         self.config = config
 
     def _send_to_url(self, data):
@@ -21,8 +21,8 @@ class Persistor(object):
     def _handle_temp(self, success, data):
         filename = os.path.join(self.config.fullpath, "temp_data.jsonl")
         if not success:
-            with open(filename, "w+") as f:
-                f.write(json.dumps(data))
+            with open(filename, "a") as f:
+                f.write(json.dumps(data) + "\n")
         if success:
             if os.path.exists(filename):
                 with open(filename, "r") as f:
@@ -36,7 +36,7 @@ class Persistor(object):
         data = self.read_buffer()
         data = [newdata] + data[:self.config.data_buffer - 1]
         with open(filename, "w") as f:
-            f.writelines([json.dumps(d) for d in data])
+            f.write("\n".join([json.dumps(d) for d in data]) + "\n")
 
     def persist(self, data):
         try:
@@ -53,5 +53,6 @@ class Persistor(object):
         filename = os.path.join(self.config.fullpath, self.config.buffer_name)
         if os.path.exists(filename):
             with open(filename, "r") as f:
-                data = [json.loads(line) for line in f.readlines()]
+                lines = f.readlines()
+            data = [json.loads(line) for line in lines]
         return data

@@ -34,16 +34,17 @@ class Configurator(object):
         self.url = config.get("url", url_frompattern)
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)
-        self.period_s = config.get("period", 15 * 60)
+        self.period_s = config.get("period_s", 5)# 15 * 60)
         return config
 
     def update(self, config, write=True):
-        fields = ["url_pattern", "token", "url", "buffer_name", "period"]
-        for k, v in config:
+        fields = ["url_pattern", "token", "url", "buffer_name", "period_s"]
+        for k, v in config.items():
             if k in fields:
                 setattr(self, k, v)
         if write:
-            self.write()
+            return self.write()
+        return config
 
     def write(self):
         config = {
@@ -52,8 +53,9 @@ class Configurator(object):
             "url": self.url,
             "buffer_name": self.buffer_name,
             "data_buffer": self.data_buffer,
-            "period": self.period_s
+            "period_s": self.period_s
         }
 
         with open(self.configfile, "w") as f:
             yaml.dump(config, f)
+        return config
