@@ -2,25 +2,27 @@ from flask import Flask, jsonify, request
 from persistance.persistor import Persistor
 from configuration.configurator import Configurator
 from sensors.sensors import Sensors
-from sensors.dht import DHT
-from sensors.sds11 import SDS
-from sensors.mq135 import MQSensor
+#from sensors.dht import DHT
+#from sensors.sds11 import SDS
+#from sensors.mq135 import MQSensor
+from sensors.dummy import DummySensor
 from schedule.sensor_schedule import SensorScheduler
 
 app = Flask(__name__)
 
 config = Configurator()
 persistor = Persistor(config)
-mq = MQSensor()
-dht = DHT()
-sds = SDS()
+#mq = MQSensor()
+#dht = DHT()
+#sds = SDS()
 try:
     sds.cmd_set_sleep(1)
 except Exception as e:
     pass
 
-sensors = Sensors(mq, dht, sds)
-
+dummy = DummySensor()
+#sensors = Sensors(mq, dht, sds)
+sensors=Sensors(dummy)
 persistor.read_buffer()
 
 scheduler = SensorScheduler(sensors, persistor)

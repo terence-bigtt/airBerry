@@ -35,7 +35,7 @@ class Persistor(object):
         filename = os.path.join(self.config.fullpath, self.config.buffer_name)
         data = self.read_buffer()
         data = [newdata] + data[:self.config.data_buffer - 1]
-        with open(filename, "w") as f:
+        with open(filename, "a") as f:
             f.write("\n".join([json.dumps(d) for d in data]) + "\n")
 
     def persist(self, data):

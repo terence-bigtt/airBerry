@@ -46,6 +46,8 @@ else
   sed -i "s/console=serial0,115200//g" $CMDLINE
 fi
 
+
+sh ./insall-requirements.sh
 echo "================================================="
 echo "||  Initial configuration done, please reboot  ||"
 echo "================================================="
