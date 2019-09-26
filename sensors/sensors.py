@@ -10,8 +10,15 @@ class Sensors(object):
         self.sensors = sensors
         self.calibrated = False
 
+    def calibration_history(self):
+        cals = []
+        for sensor in self.sensors:
+            if "calibration_history" in dir(sensor):
+                cals.extend(sensor.calibration_history)
+        return cals
+
     def calibrate(self):
-        oks=[]
+        oks = []
         for sensor in self.sensors:
             if "calibrate" in dir(sensor):
                 oks.append(sensor.calibrate())
@@ -22,4 +29,3 @@ class Sensors(object):
         for sensor in self.sensors:
             values.append(sensor.get_value())
         return values
-

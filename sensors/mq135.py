@@ -4,6 +4,8 @@ import busio
 import digitalio
 from adafruit_mcp3xxx.analog_in import AnalogIn
 import time
+import json
+import os
 import math
 
 
@@ -35,7 +37,7 @@ class MqGaz:
 class MQSensor(object):
     def __init__(self, gaz=MqGaz.NH4, cs_pin=board.D22, mcp_pin=MCP.P0, analog_scale=5., read_sample=5,
                  read_interval=100,
-                 calibration_sample=10, sample_interval=500, load_resistor=5):
+                 calibration_sample=10, sample_interval=500, load_resistor=5, cal_dir="."):
         self.gaz = gaz
         self.gaz_name = MqGaz.names[gaz]
         self.to_concentration = MqResponse().laws[self.gaz]
@@ -51,7 +53,30 @@ class MQSensor(object):
         self.calibration_sample = calibration_sample
         self._response_curves = ...
         self.clean_air_factor = 10  # TODO check in DataSheet
-        self.r0 = 10
+        self._caldir = cal_dir
+        self.r0 = None
+        self._calfile = "mq-x.jsonl"
+        self._read_calibration_data()
+        self.calibration_history = []
+        self.calibration = {}
+
+    def _read_calibration_data(self):
+        cal = {}
+        try:
+            with open(os.path.join(self._caldir, self._calfile), 'r') as f:
+                self.calibration_history = [json.loads(line) for line in f.readlines()]
+            self.calibration = self.calibration_history[-1]
+        except:
+            self.calibration_history = []
+            self.calibration = {}
+        self.r0 = self.calibration.get('r0', 10)
+
+    def _write_calibration_data(self):
+        with open(os.path.join(self._caldir, self._calfile), 'a') as f:
+            data = {'ts': time.time(), 'r0': self.r0, 'device': "mq-x"}
+            f.write(json.dumps(data) + '\n')
+        self.calibration_history.append(data)
+        self.calibration=data
 
     def calibrate(self):
         vals = []
@@ -62,6 +87,7 @@ class MQSensor(object):
         vals = [v for v in vals if v is not None]
         if len(vals) != 0:
             self.r0 = sum(vals) / len(vals) / self.clean_air_factor
+            self._write_calibration_data()
             return "Calibration done"
 
     def _measure_adc(self):
