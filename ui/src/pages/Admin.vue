@@ -50,29 +50,29 @@
         name: "Admin",
         data() {
             return {
-                settings:{
-                }
+                rootApi: process.env.VUE_APP_ROOT_API,
+                settings: {}
             }
         },
         created() {
-           this.loadSettings()
+            this.loadSettings()
         },
         methods: {
-            loadSettings(){
+            loadSettings() {
                 let vm = this
-                axios.get("http://localhost:5000/configuration").then((resp)=>{
-                    let conf= resp.data
+                axios.get(this.rootApi + "/configuration").then((resp) => {
+                    let conf = resp.data
                     console.log(conf)
-                    vm.$set(vm, 'settings', conf.data )
+                    vm.$set(vm, 'settings', conf.data)
                 })
             },
-            onSubmit(){
+            onSubmit() {
                 let vm = this
-                axios.post('http://localhost:5000/configuration', this.settings).then(function(resp){vm.loadSettings()})
+                axios.post(this.rootApi + "/configuration", this.settings).then(function(resp){vm.loadSettings()})
 
             },
-            onReset(){
-                this.settings=_.clone(defaultSettings)
+            onReset() {
+                this.settings = _.clone(defaultSettings)
             }
         }
     }

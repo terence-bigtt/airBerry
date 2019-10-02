@@ -41,12 +41,14 @@
     import axios from "axios"
     import _ from "lodash"
 
+
     export default {
         components: {
             highcharts: Chart
         },
         data() {
             return {
+                rootApi: process.env.VUE_APP_ROOT_API,
                 updateArgs: [true, true, {duration: 1000}],
                 chartOptions: {
                     chart: {
@@ -74,7 +76,7 @@
         methods: {
             loadData() {
                 let vm = this
-                axios.get("http://localhost:5000/data",).then(function (resp) {
+                axios.get(this.rootApi+"/data").then(function (resp) {
                         let data = resp.data
                         let keys = []
                         data.data.forEach(function (datum) {
@@ -94,6 +96,7 @@
                                     seriesData.push([1000 * datum["ts"], datum[key]])
                                 }
                             })
+                            seriesData = _.sortBy(seriesData, datum => datum[0])
                             return {
                                 data: seriesData,
                                 name: key
