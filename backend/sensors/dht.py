@@ -3,7 +3,7 @@ import time
 
 
 class DHT(object):
-    def __init__(self, sensor=Adafruit_DHT.DHT22, pin=26, retries=5):
+    def __init__(self, sensor=Adafruit_DHT.DHT22, pin=18, retries=5):
         self.pin = pin
         self.retries = retries
         self.sensor = sensor

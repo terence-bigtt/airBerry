@@ -23,18 +23,21 @@ class Configurator(object):
 
     def read(self):
         config = {}
+        print(self.configfile)
         if os.path.exists(self.configfile):
+
             with open(self.configfile, "r") as f:
                 config = yaml.load(f)
 
         self.url_pattern = config.get("url_pattern")
         self.token = config.get('token')
-        url_frompattern = self.url_pattern.format(
-            self.token) if self.url_pattern is not None and self.token is not None else None
+        url_frompattern = None
+        if self.url_pattern is not None and self.token is not None :
+            url_frompattern= self.url_pattern.format(self.token)
         self.url = config.get("url", url_frompattern)
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)
-        self.period_s = config.get("period_s", 15 * 60)
+        self.period_s = config.get("period_s",  60)
         return config
 
     def update(self, config, write=True):

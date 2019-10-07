@@ -7,16 +7,21 @@ class Persistor(object):
     def __init__(self, config):
         self.config = config
 
-    def _send_to_url(self, data):
-        success = False
-        if self.config.url is not None:
-            try:
-                requests.post(self.config.url, json=data)
-                success = True
-            except Exception as e:
-                print(e.args)
+    def _send_to_url(self, datatosend):
+        if type(datatosend) == list:
+            for d in datatosend:
+                self._send_to_url(d)
+        else:
+            data = datatosend
+            success = False
+            if self.config.url is not None:
+                try:
+                    requests.post(self.config.url, json=data)
+                    success = True
+                except Exception as e:
+                    print(e.args)
 
-        self._handle_temp(success, data)
+            self._handle_temp(success, data)
 
     def _handle_temp(self, success, data):
         filename = os.path.join(self.config.fullpath, "temp_data.jsonl")

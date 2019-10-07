@@ -3,13 +3,13 @@ import datetime
 
 
 class SensorScheduler(object):
-    def __init__(self, sensor, persistor):
-        self.sensor = sensor
+    def __init__(self, sensors, persistor):
+        self.sensors = sensors
         self.persistor = persistor
         self.scheduler = BackgroundScheduler()
 
     def read_and_reschedule(self):
-        data = self.sensor.get_values()
+        data = self.sensors.get_values()
         for datum in data:
             self.persistor.persist(datum)
         now = datetime.datetime.now()

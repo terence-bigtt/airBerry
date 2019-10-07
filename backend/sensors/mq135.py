@@ -22,6 +22,7 @@ class MqResponse(object):
         self.laws = {MqGaz.NH4: self.nh4, MqGaz.CO: self.co, MqGaz.CO2: self.co2}
 
     def _power_law(self, pars):
+        print("MQPowerLaw".format(self))
         exponent = math.log(pars[1][1] / pars[0][1]) / math.log(pars[1][0] / pars[0][0])
         return lambda x: pars[0][1] * math.pow((x / pars[0][0]), exponent)
 
@@ -35,7 +36,7 @@ class MqGaz:
 
 
 class MQSensor(object):
-    def __init__(self, gaz=MqGaz.NH4, cs_pin=board.D22, mcp_pin=MCP.P0, analog_scale=5., read_sample=5,
+    def __init__(self, gaz=MqGaz.NH4, cs_pin=board.D22, mcp_pin=MCP.P0, analog_scale=3.3, read_sample=5,
                  read_interval=100,
                  calibration_sample=10, sample_interval=500, load_resistor=5, cal_dir="."):
         self.gaz = gaz
@@ -76,7 +77,7 @@ class MQSensor(object):
             data = {'ts': time.time(), 'r0': self.r0, 'device': "mq-x"}
             f.write(json.dumps(data) + '\n')
         self.calibration_history.append(data)
-        self.calibration=data
+        self.calibration = data
 
     def calibrate(self):
         vals = []
@@ -91,22 +92,30 @@ class MQSensor(object):
             return "Calibration done"
 
     def _measure_adc(self):
-        return self.chan0.voltage / self.analog_scale
+        adc = self.chan0.voltage / self.analog_scale
+        print("{} - adc={}".format(self, adc))
+        return adc
 
     def _measure_resistance(self):
         adc = self._measure_adc()
         if adc != 0:
-            return self.load_resistor * (1 - adc) / adc
+            res=self.load_resistor * (1 - adc) / adc
+            print("{} - resistance={}".format(self, adc))
+            return res
 
     def get_value(self):
+        print("{}-read".format(self))
         vals = []
         for i in range(self.read_sample):
             vals.append(self._measure_resistance())
         vals = [v for v in vals if v is not None]
-        rs = self.load_resistor * sum(vals) / len(vals) if len(vals) != 0 else None
+        rs = sum(vals) / len(vals) if len(vals) != 0 else None
         ppm = self.to_concentration(rs / self.r0) if len(vals) != 0 else None
         raw = self._measure_adc() if len(vals) != 0 else None
 
         json_row = {"raw": raw, "ppm_" + self.gaz_name: ppm, 'time': time.strftime("%d.%m.%Y %H:%M:%S"),
                     "ts": time.time()}
         return json_row
+
+    def __repr__(self):
+        return "MQ135-{}".format(self.gaz)

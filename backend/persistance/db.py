@@ -7,7 +7,7 @@ Base = declarative_base()
 
 
 class Connector(object):
-    def __init__(self, dburl=None, env=None, echo=False):
+    def __init__(self, dburl=None, echo=False):
         self.dburl = dburl
         self.echo = echo
         self.engine = None

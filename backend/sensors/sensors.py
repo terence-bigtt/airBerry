@@ -19,13 +19,19 @@ class Sensors(object):
 
     def calibrate(self):
         oks = []
+        print("")
         for sensor in self.sensors:
             if "calibrate" in dir(sensor):
+                print("Calibrate sensor {}".format(sensor))
                 oks.append(sensor.calibrate())
         self.calibrated = True if None not in oks else False
 
     def get_values(self):
         values = []
         for sensor in self.sensors:
-            values.append(sensor.get_value())
+            try:
+                values.append(sensor.get_value())
+            except Exception as e:
+                print(e.args)
+                pass
         return values
