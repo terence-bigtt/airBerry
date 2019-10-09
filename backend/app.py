@@ -3,28 +3,35 @@ from flask_cors import CORS, cross_origin
 from persistance.persistor import Persistor
 from configuration.configurator import Configurator
 from sensors.sensors import Sensors
-#from sensors.dht import DHT
-#from sensors.sds11 import SDS
-#from sensors.mq135 import MQSensor
 from sensors.dummy import DummySensor
 from schedule.sensor_schedule import SensorScheduler
+
+sensor_libs = True
+try:
+    from sensors.dht import DHT
+    from sensors.sds11 import SDS
+    from sensors.mq135 import MQSensor
+except ImportError:
+    sensor_libs = False
 
 app = Flask(__name__)
 cors = CORS(app)
 config = Configurator()
 persistor = Persistor(config)
-#mq = MQSensor(cal_dir=config.fullpath)
-#dht = DHT()
-#sds = SDS()
-try:
-    sds.cmd_set_sleep(1)
-except Exception as e:
-    pass
+if sensor_libs:
+    mq = MQSensor(cal_dir=config.fullpath)
+    dht = DHT()
+    sds = SDS()
+    try:
+        sds.cmd_set_sleep(1)
+    except Exception as e:
+        pass
+    sensors = Sensors(mq, dht, sds)
+else:
+    dummy = DummySensor(caldir=config.fullpath)
+    dummy2 = DummySensor(caldir=config.fullpath, name="dummy2")
+    sensors = Sensors(dummy, dummy2)
 
-dummy = DummySensor(caldir=config.fullpath)
-dummy2 = DummySensor(caldir=config.fullpath, name="dummy2")
-#sensors = Sensors(mq, dht, sds)
-sensors = Sensors(dummy, dummy2)
 persistor.read_buffer()
 
 scheduler = SensorScheduler(sensors, persistor)
