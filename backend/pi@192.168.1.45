@@ -1,0 +1,14 @@
+#!/bin/bash
+
+airberry_user="airberry"
+
+sudo adduser $airberry_user || echo 'cannot create user ${airberry_user}' && exit 2
+su -c $airberry_user
+cd $HOME
+rm -rf ./airberry
+mkdir -p $HOME/.airberry/app
+git clone https://github.com/terence-bigtt/airBerry.git
+mv $HOME/airBerry/backend/* $HOME/.airberry/app/
+rm -rf ./airberry
+
+
