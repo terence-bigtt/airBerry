@@ -22,7 +22,7 @@
       >
         <label>Url</label>
         <b-form-input
-          v-model="settings.url"/>
+          v-model="settings.url_pattern"/>
         <label>Token</label>
         <b-form-input
           v-model="settings.token"/>
@@ -42,7 +42,7 @@
 
     const defaultSettings = {
         period_s: null,
-        url: null,
+        url_pattern: null,
         token: null,
         data_buffer: null
     }
