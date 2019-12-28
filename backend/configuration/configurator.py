@@ -34,9 +34,10 @@ class Configurator(object):
         self.url_pattern = config.get("url_pattern")
         self.token = config.get('token')
         url_frompattern = None
+        self.url = config.get("url")
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
-        self.url = config.get("url", url_frompattern)
+            self.url = url_frompattern
         print(f"have set post url to {self.url}")
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)

@@ -15,10 +15,15 @@ class Persistor(object):
             data = datatosend
             success = False
             if self.config.url is not None:
+                print("will try to send to url")
                 try:
-                    requests.post(self.config.url, json=data)
+                    r= requests.post(self.config.url, json=data)
+                    print(r.status_code)
+                    if(r.status_code >=300):
+                        print(r.content)
                     success = True
                 except Exception as e:
+
                     print(e.args)
 
             self._handle_temp(success, data)
@@ -45,10 +50,12 @@ class Persistor(object):
 
     def persist(self, data):
         try:
+            print("send to url")
             self._send_to_url(data)
         except Exception as e:
             print(e.args)
         try:
+            print("persist to disk")
             self._to_disk(data)
         except Exception as e:
             print(e.args)
