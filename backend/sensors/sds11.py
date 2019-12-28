@@ -35,7 +35,7 @@ class SDS(object):
         self.byte, self.data = 0, ""
 
     def dump(self, d, prefix=''):
-        print(prefix + ' '.join(x.encode('hex') for x in d))
+        print(prefix + ' '.join( f"{x}" for x in d))
 
     def construct_command(self, cmd, data=[]):
         assert len(data) <= 12
@@ -110,6 +110,7 @@ class SDS(object):
         self.read_response()
 
     def get_value(self):
+        print("SDS11 - read")
         self.cmd_set_sleep(0)
         time.sleep(2)
         self.cmd_set_working_period(SDS_CONSTS.PERIOD_CONTINUOUS)
@@ -121,6 +122,7 @@ class SDS(object):
         for t in range(10):
             val = self.cmd_query_data()
             values.append(val)
+            print(f"SDS11 - {val[0]} - {val[1]}")
         values = [v for v in values if v is not None and len(v) == 2]
         pm25 = [v[0] for v in values]
         pm10 = [v[1] for v in values]

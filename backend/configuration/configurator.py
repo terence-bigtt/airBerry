@@ -45,6 +45,9 @@ class Configurator(object):
         for k, v in config.items():
             if k in fields:
                 setattr(self, k, v)
+        if self.url_pattern is not None and self.token is not None :
+            url_frompattern= self.url_pattern.format(self.token)
+        self.url = config.get("url", url_frompattern)
         if write:
             return self.write()
         return config
