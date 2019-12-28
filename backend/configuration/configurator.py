@@ -45,7 +45,8 @@ class Configurator(object):
         fields = ["url_pattern", "token", "url", "buffer_name", "period_s"]
         for k, v in config.items():
             if k in fields:
-                setattr(self, k, v)
+                self.setattr(self, k, v)
+        url_frompattern=None
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
         self.url = config.get("url", url_frompattern)
