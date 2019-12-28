@@ -1,3 +1,5 @@
+from builtins import setattr
+
 import os, yaml
 
 
@@ -45,11 +47,14 @@ class Configurator(object):
         fields = ["url_pattern", "token", "url", "buffer_name", "period_s"]
         for k, v in config.items():
             if k in fields:
-                self.setattr(self, k, v)
+                setattr(self, k, v)
+                print(f"setting attr {k} to {v}")
         url_frompattern=None
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
+            print(f"url from pattern: {url_frompattern}")
         self.url = config.get("url", url_frompattern)
+        print(f"have set post url to {self.url}")
         if write:
             return self.write()
         return config
