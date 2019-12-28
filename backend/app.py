@@ -21,7 +21,7 @@ persistor = Persistor(config)
 if sensor_libs:
     mq = MQSensor(cal_dir=config.fullpath)
     dht = DHT()
-    sds = SDS()
+    sds = SDS(DEBUG=True)
     try:
         sds.cmd_set_sleep(1)
     except Exception as e:
