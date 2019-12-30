@@ -68,5 +68,10 @@ class Persistor(object):
         if os.path.exists(filename):
             with open(filename, "r") as f:
                 lines = f.readlines()
-            data = [json.loads(line) for line in lines]
+            data = []
+            for i, line in enumerate(lines):
+                try:
+                    data.append(json.loads(line))
+                except Exception as e:
+                    print("failed to read line {i}", e.args)
         return data
