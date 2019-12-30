@@ -23,7 +23,7 @@ class Persistor(object):
                         print(r.content)
                     success = True
                 except Exception as e:
-
+                    print("failed sending to url")
                     print(e.args)
 
             self._handle_temp(success, data)
@@ -31,7 +31,9 @@ class Persistor(object):
     def _handle_temp(self, success, data):
         filename = os.path.join(self.config.fullpath, "temp_data.jsonl")
         if not success:
-            with open(filename, "a") as f:
+            if os.path.exists(filename): mode="a"
+            else: mode="w"
+            with open(filename, mode) as f:
                 f.write(json.dumps(data) + "\n")
         if success:
             if os.path.exists(filename):
