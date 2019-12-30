@@ -5,9 +5,10 @@ set -x
 cd $airberry_home
 
 sudo rm -rf ./airBerry
-sudo mkdir -p .airberry/app
 sudo git clone https://github.com/terence-bigtt/airBerry.git
-sudo mv -R $airberry_home/airBerry/backend/* $airberry_home/.airberry/app/
+sudo rm -rf /airberry/app
+sudo mkdir -p .airberry/app
+sudo cp -rf $airberry_home/airBerry/backend/* $airberry_home/.airberry/app/
 sudo cp -rf $airberry_home/airBerry/ui/dist/* /var/www/html/air
 sudo rm -rf $airberry_home/airBerry
 
