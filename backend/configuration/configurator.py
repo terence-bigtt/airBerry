@@ -42,7 +42,9 @@ class Configurator(object):
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)
         self.period_s = config.get("period_s",  60)
-        return config
+        fullconf=config.copy()
+        fullconf.update({"home": self.home, "fullpath": self.fullpath})
+        return fullconf
 
     def update(self, config, write=True):
         fields = ["url_pattern", "token", "url", "buffer_name", "period_s"]

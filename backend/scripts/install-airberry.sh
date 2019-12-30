@@ -15,7 +15,7 @@ sudo chown -R $airberry_user:$airberry_user .airberry
 sudo su $airberry_user -c "pip3 install -r .airberry/app/requirements.txt"
 
 ### Deploy service auto start
-sudo tee -a $service_path > /dev/null <<EOF "[Unit]
+sudo tee $service_path > /dev/null <<EOF [Unit]
 Description=Airberry Daemon
 After=multi-user.target
 
@@ -23,13 +23,14 @@ After=multi-user.target
 Type=simple
 User=${airberry_user}
 ExecStart=/usr/bin/python3 ${airberry_home}/.airberry/app/app.py
-Restart=on-failure
+Restart=always
+StandardOutput=append:/var/log/airberry.log
 
 [Install]
-WantedBy=mutli-user.target"
+WantedBy=mutli-user.target
 EOF
 
 sudo chmod 644 $service_path
 sudo systemctl enable $service_name
 sudo systemctl daemon-reload
-sudo sustemctl restart $service_name
+sudo systemctl restart $service_name

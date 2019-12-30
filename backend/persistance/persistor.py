@@ -60,7 +60,7 @@ class Persistor(object):
             print("persist to disk")
             self._to_disk(data)
         except Exception as e:
-            print(e.args)
+            print("failed persist to disk", e.args)
 
     def read_buffer(self):
         data = []

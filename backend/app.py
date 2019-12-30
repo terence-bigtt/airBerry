@@ -50,6 +50,12 @@ def hello_world():
 def read_saved_data():
     return jsonify(is_error=False, data=persistor.read_buffer())
 
+@app.route("/read", methods=["POST"])
+@cross_origin()
+def read():
+    scheduler.read_and_reschedule()
+    return jsonify(is_error=False, data=persistor.read_buffer())
+
 
 @app.route("/configuration", methods=["GET", "POST"])
 @cross_origin()
