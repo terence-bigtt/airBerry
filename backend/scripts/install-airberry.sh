@@ -16,7 +16,8 @@ sudo chown -R $airberry_user:$airberry_user .airberry
 sudo su $airberry_user -c "pip3 install -r .airberry/app/requirements.txt"
 
 ### Deploy service auto start
-sudo tee $service_path > /dev/null <<EOF [Unit]
+sudo tee $service_path > /dev/null <<EOF
+[Unit]
 Description=Airberry Daemon
 After=multi-user.target
 

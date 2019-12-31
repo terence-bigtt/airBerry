@@ -17,11 +17,17 @@ class Persistor(object):
             if self.config.url is not None:
                 print("will try to send to url")
                 try:
-                    r= requests.post(self.config.url, json=data)
+                    json = data.copy()
+                    ts = json.pop("ts")
+                    json={"ts":ts, "values":json}
+                    print(json)
+                    r= requests.post(self.config.url, json=json)
                     print(r.status_code)
                     if(r.status_code >=300):
                         print(r.content)
-                    success = True
+                        success=False
+                    else:
+                        success = True
                 except Exception as e:
                     print("failed sending to url")
                     print(e.args)
@@ -40,7 +46,8 @@ class Persistor(object):
                 with open(filename, "r") as f:
                     datae = [json.loads(line) for line in f.readlines()]
             os.remove(filename)
-            for data in datae:
+            for i, data in enumerate(datae):
+                print(f"send data {i} to url.")
                 self._send_to_url(data)
 
     def _to_disk(self, newdata):
