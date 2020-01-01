@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import requests
 import json
 
@@ -15,7 +16,7 @@ class Persistor(object):
             data = datatosend
             success = False
             if self.config.url is not None:
-                print("will try to send to url", file=sys.stdout)
+                print("will try to send to url", file= sys.stdout)
                 try:
                     json = data.copy()
                     ts = json.pop("ts")
