@@ -27,7 +27,7 @@ class Configurator(object):
         config = {}
         print(self.configfile)
         if os.path.exists(self.configfile):
-            print("reading configfile at {}".format(self.configfile))
+            print("reading configfile at {}".format(self.configfile), file=sys.stdout)
             with open(self.configfile, "r") as f:
                 config = yaml.load(f)
 
@@ -38,7 +38,7 @@ class Configurator(object):
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
             self.url = url_frompattern
-        print(f"have set post url to {self.url}")
+        print(f"have set post url to {self.url}", file=sys.stdout)
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)
         self.period_s = config.get("period_s",  60)
@@ -56,10 +56,10 @@ class Configurator(object):
         self.url = config.get("url")
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
-            print(f"url from pattern: {url_frompattern}")
+            print(f"url from pattern: {url_frompattern}", file=sys.stdout)
             self.url = url_frompattern
 
-        print(f"have set post url to {self.url}")
+        print(f"have set post url to {self.url}", file=sys.stdout)
         if write:
             return self.write()
         return config

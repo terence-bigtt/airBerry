@@ -19,13 +19,15 @@ sudo su $airberry_user -c "pip3 install -r .airberry/app/requirements.txt"
 sudo tee $service_path > /dev/null <<EOF
 [Unit]
 Description=Airberry Daemon
-After=multi-user.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
 User=${airberry_user}
 ExecStart=/usr/bin/python3 ${airberry_home}/.airberry/app/app.py
 Restart=always
+RestartSec=10
 StandardOutput=append:/var/log/airberry.log
 
 [Install]
