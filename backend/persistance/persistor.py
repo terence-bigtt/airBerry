@@ -56,8 +56,8 @@ class Persistor(object):
                     except Exception as e:
                         self.logger.warning(f"Cannot json decode line {i}")
 
-            self.logger.info("remove temp data")
-            os.remove(filename)
+                self.logger.info("remove temp data")
+                os.remove(filename)
             for i, data in enumerate(datae):
                 self.logger.info(f"send data {i} to url.")
                 self._send_to_url(data)
