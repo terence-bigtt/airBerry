@@ -44,12 +44,12 @@ class Persistor(object):
             with open(filename, mode) as f:
                 f.write(json.dumps(data) + "\n")
         if success:
-            logger.info("successfully sent last measurement, will send local")
+            self.logger.info("successfully sent last measurement, will send local")
             if os.path.exists(filename):
                 with open(filename, "r") as f:
-                    logger.info("readin previous temp data")
+                    self.logger.info("reading previous temp data")
                     datae = [json.loads(line) for line in f.readlines()]
-            logger.info("remove temp data")
+            self.logger.info("remove temp data")
             os.remove(filename)
             for i, data in enumerate(datae):
                 self.logger.info(f"send data {i} to url.")
