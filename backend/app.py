@@ -16,7 +16,7 @@ except ImportError:
 
 app = Flask(__name__)
 cors = CORS(app)
-config = Configurator()
+config = Configurator(app.logger)
 
 persistor = Persistor(config, logger=app.logger)
 if sensor_libs:
