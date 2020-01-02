@@ -48,7 +48,14 @@ class Persistor(object):
             if os.path.exists(filename):
                 with open(filename, "r") as f:
                     self.logger.info("reading previous temp data")
-                    datae = [json.loads(line) for line in f.readlines()]
+                    str_datae = [line for line in f.readlines()]
+                datae=[]
+                for i, data in enumerate(str_datae):
+                    try:
+                        datae.append(json.loads(data))
+                    except Exception as e:
+                        self.logger.warning(f"Cannot json decode line {i}")
+
             self.logger.info("remove temp data")
             os.remove(filename)
             for i, data in enumerate(datae):
