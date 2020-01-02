@@ -21,7 +21,7 @@ class Persistor(object):
                 try:
                     json = data.copy()
                     ts = json.pop("ts")
-                    js={"ts":ts, "values":json}
+                    js={"ts": 1000*ts, "values":json}
                     self.logger.info(js)
                     r= requests.post(self.config.url, json=js)
                     self.logger.info(r.status_code)
