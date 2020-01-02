@@ -17,7 +17,8 @@ except ImportError:
 app = Flask(__name__)
 cors = CORS(app)
 config = Configurator()
-persistor = Persistor(config)
+
+persistor = Persistor(config, logger=app.logger)
 if sensor_libs:
     mq = MQSensor(cal_dir=config.fullpath)
     dht = DHT()

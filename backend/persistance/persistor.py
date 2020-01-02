@@ -5,8 +5,9 @@ import json
 
 
 class Persistor(object):
-    def __init__(self, config):
+    def __init__(self, config, logger):
         self.config = config
+        self.logger = logger
 
     def _send_to_url(self, datatosend):
         if type(datatosend) == list:
@@ -16,22 +17,22 @@ class Persistor(object):
             data = datatosend
             success = False
             if self.config.url is not None:
-                print("will try to send to url", file= sys.stdout)
+                self.logger.info("will try to send to url")
                 try:
                     json = data.copy()
                     ts = json.pop("ts")
-                    json={"ts":ts, "values":json}
-                    print(json, file=sys.stdout)
-                    r= requests.post(self.config.url, json=json)
-                    print(r.status_code, file=sys.stdout)
+                    js={"ts":ts, "values":json}
+                    self.logger.info(js, file=sys.stdout)
+                    r= requests.post(self.config.url, json=js)
+                    self.logger.info(r.status_code)
                     if(r.status_code >=300):
-                        print(r.content, file=sys.stdout)
+                        self.logger.error(r.content)
                         success=False
                     else:
                         success = True
                 except Exception as e:
-                    print("failed sending to url", file=sys.stdout)
-                    print(e.args, file=sys.stdout)
+                    self.logger.error("failed sending to url")
+                    self.logger.error(e.args)
 
             self._handle_temp(success, data)
 
@@ -48,7 +49,7 @@ class Persistor(object):
                     datae = [json.loads(line) for line in f.readlines()]
             os.remove(filename)
             for i, data in enumerate(datae):
-                print(f"send data {i} to url.", file=sys.stdout)
+                self.logger.info(f"send data {i} to url.")
                 self._send_to_url(data)
 
     def _to_disk(self, newdata):
@@ -60,15 +61,16 @@ class Persistor(object):
 
     def persist(self, data):
         try:
-            print("send to url", file=sys.stdout)
+            self.logger.info("send to url")
             self._send_to_url(data)
         except Exception as e:
-            print(e.args, file=sys.stdout)
+            self.logger.error(e.args)
         try:
-            print("persist to disk", file=sys.stdout)
+            self.logger.info("persist to disk")
             self._to_disk(data)
         except Exception as e:
-            print("failed persist to disk", e.args, file=sys.stdout)
+            self.logger.error("failed persist to disk")
+            self.logger.error(e.args)
 
     def read_buffer(self):
         data = []
@@ -81,5 +83,6 @@ class Persistor(object):
                 try:
                     data.append(json.loads(line))
                 except Exception as e:
-                    print("failed to read line {i}", e.args, file=sys.stdout)
+                    self.logger.error("failed to read line {i}")
+                    self.logger.error(e.args)
         return data

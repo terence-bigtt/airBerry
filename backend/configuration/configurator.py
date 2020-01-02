@@ -4,8 +4,9 @@ import os, yaml, sys
 
 
 class Configurator(object):
-    def __init__(self, directory=".airberry"):
+    def __init__(self, logger, directory=".airberry"):
         self.url_pattern = None
+        self.logger= logger
         self.token = None
         self.url = None
         self.directory = directory
@@ -27,18 +28,18 @@ class Configurator(object):
         config = {}
         print(self.configfile)
         if os.path.exists(self.configfile):
-            print("reading configfile at {}".format(self.configfile), file=sys.stdout)
+            self.logger.info("reading configfile at {}".format(self.configfile))
             with open(self.configfile, "r") as f:
                 config = yaml.load(f)
 
         self.url_pattern = config.get("url_pattern")
         self.token = config.get('token')
-        url_frompattern = None
+
         self.url = config.get("url")
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
             self.url = url_frompattern
-        print(f"have set post url to {self.url}", file=sys.stdout)
+        self.logger.info(f"have set post url to {self.url}")
         self.buffer_name = config.get("buffername", "telemetry_tmp.jsonl")
         self.data_buffer = config.get("data_buffer", 100)
         self.period_s = config.get("period_s",  60)
@@ -52,14 +53,13 @@ class Configurator(object):
             if k in fields:
                 setattr(self, k, v)
                 print(f"setting attr {k} to {v}")
-        url_frompattern=None
         self.url = config.get("url")
         if self.url_pattern is not None and self.token is not None :
             url_frompattern= self.url_pattern.format(self.token)
-            print(f"url from pattern: {url_frompattern}", file=sys.stdout)
+            self.logger.info(f"url from pattern: {url_frompattern}")
             self.url = url_frompattern
 
-        print(f"have set post url to {self.url}", file=sys.stdout)
+        self.logger.info(f"have set post url to {self.url}")
         if write:
             return self.write()
         return config
