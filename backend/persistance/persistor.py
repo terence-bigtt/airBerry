@@ -22,7 +22,7 @@ class Persistor(object):
                     json = data.copy()
                     ts = json.pop("ts")
                     js={"ts":ts, "values":json}
-                    self.logger.info(js, file=sys.stdout)
+                    self.logger.info(js)
                     r= requests.post(self.config.url, json=js)
                     self.logger.info(r.status_code)
                     if(r.status_code >=300):
