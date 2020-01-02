@@ -55,12 +55,11 @@ class Persistor(object):
                         datae.append(json.loads(data))
                     except Exception as e:
                         self.logger.warning(f"Cannot json decode line {i}")
-
                 self.logger.info("remove temp data")
                 os.remove(filename)
-            for i, data in enumerate(datae):
-                self.logger.info(f"send data {i} to url.")
-                self._send_to_url(data)
+                for i, data in enumerate(datae):
+                    self.logger.info(f"send data {i} to url.")
+                    self._send_to_url(data)
 
     def _to_disk(self, newdata):
         filename = os.path.join(self.config.fullpath, self.config.buffer_name)
