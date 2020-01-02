@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+import logging
 from flask_cors import CORS, cross_origin
 from persistance.persistor import Persistor
 from configuration.configurator import Configurator
@@ -6,6 +7,7 @@ from sensors.sensors import Sensors
 from sensors.dummy import DummySensor
 from schedule.sensor_schedule import SensorScheduler
 
+logging.basicConfig(level=logging.DEBUG)
 sensor_libs = True
 try:
     from sensors.dht import DHT
@@ -15,6 +17,7 @@ except ImportError:
     sensor_libs = False
 
 app = Flask(__name__)
+
 cors = CORS(app)
 config = Configurator(app.logger)
 
