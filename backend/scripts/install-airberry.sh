@@ -19,19 +19,29 @@ sudo su $airberry_user -c "pip3 install -r .airberry/app/requirements.txt"
 sudo tee $service_path > /dev/null <<EOF
 [Unit]
 Description=Airberry Daemon
-After=network-online.target
-Wants=network-online.target
+After=network.target
+After = network.target
 
 [Service]
 Type=simple
+PermissionsStartOnly = true
+
+PIDFile = /run/airberry/app.pid
 User=${airberry_user}
-ExecStart=/usr/bin/python3 ${airberry_home}/.airberry/app/app.py
+Group=${airberry_user}
+WorkingDirectory = /home/airberry/.airberry/app
+ExecStartPre = /bin/mkdir /run/airberry
+ExecStartPre = /bin/chown -R $airberry_user:$airberry_user /run/airberry
+ExecStart = /usr/bin/env gunicorn app:app -b 0.0.0.0:5000 --pid /run/airberry/app.pid
+ExecReload = /bin/kill -s HUP $MAINPID
+ExecStop = /bin/kill -s TERM $MAINPID
+ExecStopPost = /bin/rm -rf /run/airberry
 Restart=always
 RestartSec=10
 StandardOutput=append:/var/log/airberry.log
 
 [Install]
-WantedBy=mutli-user.target
+WantedBy = multi-user.target
 EOF
 
 sudo chmod 644 $service_path
