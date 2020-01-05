@@ -6,6 +6,7 @@ from configuration.configurator import Configurator
 from sensors.sensors import Sensors
 from sensors.dummy import DummySensor
 from schedule.sensor_schedule import SensorScheduler
+import multiprocessing
 
 logging.basicConfig(level=logging.DEBUG)
 sensor_libs = True
@@ -20,8 +21,8 @@ app = Flask(__name__)
 
 cors = CORS(app)
 config = Configurator(app.logger)
-
 persistor = Persistor(config, logger=app.logger)
+
 if sensor_libs:
     mq = MQSensor(cal_dir=config.fullpath)
     dht = DHT()
@@ -36,11 +37,10 @@ else:
     dummy2 = DummySensor(caldir=config.fullpath, name="dummy2")
     sensors = Sensors(dummy, dummy2)
 
-persistor.read_buffer()
-
 scheduler = SensorScheduler(sensors, persistor)
 scheduler.scheduler.start()
-scheduler.read_and_reschedule()
+busy = multiprocessing.Value("b", False)
+scheduler.read_and_reschedule(busy)
 
 
 @app.route('/')
@@ -58,7 +58,8 @@ def read_saved_data():
 @app.route("/read", methods=["POST"])
 @cross_origin()
 def read():
-    scheduler.read_and_reschedule()
+    if not busy.value:
+        scheduler.read_and_reschedule(busy)
     return jsonify(is_error=False, data=persistor.read_buffer())
 
 

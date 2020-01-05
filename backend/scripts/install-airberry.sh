@@ -14,6 +14,8 @@ sudo rm -rf $airberry_home/airBerry
 
 sudo chown -R $airberry_user:$airberry_user .airberry
 sudo su $airberry_user -c "pip3 install -r .airberry/app/requirements.txt"
+sudo apt install gunicorn3 -y
+
 
 ### Deploy service auto start
 sudo tee $service_path > /dev/null <<EOF
@@ -25,14 +27,14 @@ After = network.target
 [Service]
 Type=simple
 PermissionsStartOnly = true
-
 PIDFile = /run/airberry/app.pid
 User=${airberry_user}
 Group=${airberry_user}
 WorkingDirectory = /home/airberry/.airberry/app
 ExecStartPre = /bin/mkdir /run/airberry
 ExecStartPre = /bin/chown -R $airberry_user:$airberry_user /run/airberry
-ExecStart = /usr/bin/env gunicorn app:app -b 0.0.0.0:5000 --pid /run/airberry/app.pid
+Environment=FLASK_ENV=production
+ExecStart = /usr/bin/gunicorn3 -w 1 app:app -b 0.0.0.0:5000 --pid /run/airberry/app.pid
 ExecReload = /bin/kill -s HUP $MAINPID
 ExecStop = /bin/kill -s TERM $MAINPID
 ExecStopPost = /bin/rm -rf /run/airberry
