@@ -2,9 +2,10 @@ import os, json, time, random
 
 
 class DummySensor(object):
-    def __init__(self, caldir=".", name="dummy"):
+    def __init__(self, caldir=".", name="dummy", lag=0):
         self.calib = False
         self.name=name
+        self.lag=lag
         self.calibration_history = []
         self.calibration = {}
         self._caldir = caldir
@@ -12,6 +13,7 @@ class DummySensor(object):
         self._read_calibration_data()
 
     def get_value(self):
+        time.sleep(self.lag)
         value = random.randint(10, 20)
         ts = time.time()
         tstime = time.strftime("%d.%m.%Y %H:%M:%S")
@@ -20,6 +22,7 @@ class DummySensor(object):
     def calibrate(self):
         self._write_calibration_data()
         self.calib = True
+        return self.calib
 
     def _read_calibration_data(self):
         try:

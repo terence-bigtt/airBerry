@@ -89,7 +89,7 @@ class MQSensor(object):
         if len(vals) != 0:
             self.r0 = sum(vals) / len(vals) / self.clean_air_factor
             self._write_calibration_data()
-            return "Calibration done"
+            return True
 
     def _measure_adc(self):
         adc = self.chan0.voltage / self.analog_scale

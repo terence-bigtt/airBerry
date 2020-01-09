@@ -2,6 +2,15 @@ from builtins import setattr
 
 import os, yaml, sys
 
+#TODO: Refactor config to
+#
+# { "measure": {period_s},
+#   "persistance":[
+#                   {"type": "thingsboard", "base_url", "token", "tempfile""},
+#                   {"type": "disk",  "buffersize", "bufferfile"}
+#                 ]
+# }
+
 
 class Configurator(object):
     def __init__(self, logger, directory=".airberry"):
@@ -65,6 +74,7 @@ class Configurator(object):
         return config
 
     def write(self):
+
         config = {
             "url_pattern": self.url_pattern,
             "token": self.token,

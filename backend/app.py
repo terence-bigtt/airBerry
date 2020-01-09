@@ -1,47 +1,21 @@
-from flask import Flask, jsonify, request
 import logging
+
+from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
-from persistance.persistor import Persistor
+
 from configuration.configurator import Configurator
-from sensors.sensors import Sensors
-from sensors.dummy import DummySensor
+from persistance.diskwriter import DiskWriterMessages
 from schedule.sensor_schedule import SensorScheduler
-import multiprocessing
+from sensors.sensors import SensorsMessages
 
 logging.basicConfig(level=logging.DEBUG)
-sensor_libs = True
-try:
-    from sensors.dht import DHT
-    from sensors.sds11 import SDS
-    from sensors.mq135 import MQSensor
-except ImportError:
-    sensor_libs = False
-
 app = Flask(__name__)
 
 cors = CORS(app)
 config = Configurator(app.logger)
-persistor = Persistor(config, logger=app.logger)
+scheduler = SensorScheduler(config, app.logger)
 
-if sensor_libs:
-    mq = MQSensor(cal_dir=config.fullpath)
-    dht = DHT()
-    sds = SDS(DEBUG=True)
-    try:
-        sds.cmd_set_sleep(1)
-    except Exception as e:
-        pass
-    sensors = Sensors(mq, dht, sds)
-else:
-    dummy = DummySensor(caldir=config.fullpath)
-    dummy2 = DummySensor(caldir=config.fullpath, name="dummy2")
-    sensors = Sensors(dummy, dummy2)
-
-scheduler = SensorScheduler(sensors, persistor)
-scheduler.scheduler.start()
-busy = multiprocessing.Value("b", False)
-scheduler.read_and_reschedule(busy)
-
+scheduler.start()
 
 @app.route('/')
 @cross_origin()
@@ -52,25 +26,24 @@ def hello_world():
 @app.route('/data')
 @cross_origin()
 def read_saved_data():
-    return jsonify(is_error=False, data=persistor.read_buffer())
+    return jsonify(is_error=False, data=scheduler.diskpersistor.ask(DiskWriterMessages.READ, block=True))
 
 
 @app.route("/read", methods=["POST"])
 @cross_origin()
 def read():
-    if not busy.value:
-        scheduler.read_and_reschedule(busy)
-    return jsonify(is_error=False, data=persistor.read_buffer())
+    scheduler.read_and_reschedule()
+    return jsonify(is_error=False)
 
 
 @app.route("/configuration", methods=["GET", "POST"])
 @cross_origin()
 def configure():
     if request.method == "GET":
-        return jsonify(is_error=False, data=persistor.config.read())
+        return jsonify(is_error=False, data=config.read())
     if request.method == "POST":
         newconf = request.json
-        persistor.config.update(newconf)
+        scheduler.update(newconf)
         return "OK", 200
 
 
@@ -78,9 +51,9 @@ def configure():
 @cross_origin()
 def calibrate():
     if request.method == "GET":
-        return jsonify(is_error=False, data={"calibration": sensors.calibration_history()})
+        return jsonify(is_error=False, data={"calibration": scheduler.sensors.calibration_history()})
     if request.method == "POST":
-        sensors.calibrate()
+        scheduler.sensors.ask(SensorsMessages.CALIBRATE).calibrate()
         return "OK", 200
 
 
