@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div>
+      App Url: <b-form-input v-model="rootApi"/>
+    </div>
     <highcharts :options="chartOptions"/>
     <br>
     <div>
@@ -48,7 +51,7 @@
         },
         data() {
             return {
-                rootApi: process.env.VUE_APP_ROOT_API,
+                rootApi: "http://"+ window.location.hostname + ":5000",
                 updateArgs: [true, true, {duration: 1000}],
                 chartOptions: {
                     chart: {
@@ -76,31 +79,14 @@
         methods: {
             loadData() {
                 let vm = this
-                axios.get(this.rootApi+"/data").then(function (resp) {
-                        let data = resp.data
-                        let keys = []
-                        data.data.forEach(function (datum) {
-                            let newKeys = _.filter(_.keys(datum), function (key) {
-                                return key !== "ts" && key !== "time"
-                            })
-                            newKeys.forEach(function (newKey) {
-                                if (!_.includes(keys, newKey)) {
-                                    keys.push(newKey)
-                                }
-                            })
-                        })
-                        let series = _.map(keys, function (key) {
-                            let seriesData = []
-                            data.data.forEach(function (datum) {
-                                if (datum[key]) {
-                                    seriesData.push([1000 * datum["ts"], datum[key]])
-                                }
-                            })
-                            seriesData = _.sortBy(seriesData, datum => datum[0])
-                            return {
-                                data: seriesData,
-                                name: key
-                            }
+                axios.get(this.rootApi + "/data").then(function (resp) {
+                        let data = resp.data.data
+                        let dataSeries = _.groupBy(data, d => d.name)
+                        let series = _.map(dataSeries, function (values, key) {
+                            console.log({values:values})
+                            let series = _.map(values, v => [1000 * v.ts, v.value])
+                            console.log(series)
+                            return {name: key, data: series}
                         })
                         vm.$set(vm.chartOptions, "series", series)
                     }

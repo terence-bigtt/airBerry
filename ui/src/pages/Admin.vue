@@ -20,10 +20,10 @@
         label-class="font-weight-bold pt-0"
         class="mb-0"
       >
-        <label>Url</label>
+        <label>ThingsBoard Url</label>
         <b-form-input
           v-model="settings.url_pattern"/>
-        <label>Token</label>
+        <label>ThingsBoard Token</label>
         <b-form-input
           v-model="settings.token"/>
         <label>Local buffer size</label>
@@ -69,6 +69,7 @@
             onSubmit() {
                 let vm = this
                 axios.post(this.rootApi + "/configuration", this.settings).then(function(resp){vm.loadSettings()})
+                    .then(resp=> alert("Success"), resp=>alert("Failed"))
 
             },
             onReset() {
