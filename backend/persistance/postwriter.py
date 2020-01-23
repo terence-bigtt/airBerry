@@ -37,7 +37,7 @@ class PostWriter(ThreadingActor):
             if self.url is not None:
                 self.logger.info(f"will try to post to {self.url}")
                 try:
-                    r = requests.post(self.url, json=data, headers=header)
+                    r = requests.post(self.url, json=data, headers=header, verify=False)
                     self.logger.info(r.status_code)
                     if r.status_code >= 300:
                         self.logger.error(r.content)
